@@ -67,6 +67,16 @@ enum class OpenAiCompatibleTemplate(
      */
     val embeddingModelFetcher: ((apiKey: String, baseUrl: String, httpVersion: HttpClient.Version) -> List<String>)? = null,
 ) {
+    CHEAPER_INFERENCE(
+        displayName = "Cheaper Inference",
+        initials = "CI",
+        taglineKey = "provider.template.cheaper_inference.tagline",
+        baseUrl = "https://api.cheaperinference.com/v1",
+        apiKeyRequired = true,
+        apiKeyUrl = "https://cheaperinference.com/signup",
+        helpTextKey = "provider.template.cheaper_inference.help",
+    ),
+
     CLOUDFLARE_AI(
         displayName = "Cloudflare AI",
         initials = "CF",
