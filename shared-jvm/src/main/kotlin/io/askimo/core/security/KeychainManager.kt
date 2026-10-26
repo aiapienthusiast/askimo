@@ -208,8 +208,11 @@ object KeychainManager {
         secretKey: String,
     ): Boolean {
         val account = "askimo-$keyIdentifier"
-        val process =
-            ProcessBuilderExt(
+
+        // Only set -T on creation; combining -T with -U on an existing item re-applies the ACL
+        // and triggers a "change access permissions" prompt on every call.
+        val args =
+            mutableListOf(
                 "security",
                 "add-generic-password",
                 "-a",
@@ -218,11 +221,33 @@ object KeychainManager {
                 SERVICE_NAME,
                 "-w",
                 secretKey,
-                "-U", // Update if exists
-            ).start()
+            )
 
+        if (!macOSKeychainItemExists(account)) {
+            // New item: trust the `security` binary so future calls skip the confirm prompt.
+            args += listOf("-T", "/usr/bin/security")
+        } else {
+            // Existing item: update password only, leave ACL untouched.
+            args += "-U"
+        }
+
+        val process = ProcessBuilderExt(*args.toTypedArray()).start()
         val exitCode = process.waitFor()
         return exitCode == 0
+    }
+
+    /** Checks item existence via metadata only (no `-w`), avoiding a secret-access prompt. */
+    private fun macOSKeychainItemExists(account: String): Boolean {
+        val process =
+            ProcessBuilderExt(
+                "security",
+                "find-generic-password",
+                "-a",
+                account,
+                "-s",
+                SERVICE_NAME,
+            ).start()
+        return process.waitFor() == 0
     }
 
     private fun retrieveMacOSKeychain(keyIdentifier: String): String? {

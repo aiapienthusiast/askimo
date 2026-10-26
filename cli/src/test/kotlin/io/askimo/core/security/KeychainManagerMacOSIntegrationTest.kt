@@ -196,7 +196,7 @@ class KeychainManagerMacOSIntegrationTest {
     }
 
     private fun generateTestProvider(suffix: String): String {
-        val provider = "$TEST_PROVIDER_PREFIX-$suffix-${System.currentTimeMillis()}"
+        val provider = "$TEST_PROVIDER_PREFIX-$suffix"
         testProviders.add(provider)
         return provider
     }
